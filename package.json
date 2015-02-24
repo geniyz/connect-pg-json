@@ -13,7 +13,7 @@
     "express",
     "json"
   ],
-  "version": "1.2",
+  "version": "1.2.1",
   "homepage": "https://github.com/geniyz/connect-pg-json",
   "repository": {
     "type": "git",
@@ -31,6 +31,6 @@
   "bugs": {
     "url": "https://github.com/geniyz/connect-pg-json/issues"
   },
-  "_id": "connect-pg-json@1.2.0",
+  "_id": "connect-pg-json@1.2.1",
   "_from": "connect-pg-json@"
 }
