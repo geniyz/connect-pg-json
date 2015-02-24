@@ -1,0 +1,36 @@
+{
+  "author": {
+    "name": "Владимир Овсянников",
+    "email": "geniyz@ya.ru"
+  },
+  "name": "connect-pg-json",
+  "description": "Connect storage using PostgreSQL with datatype JSON",
+  "keywords": [
+    "pg",
+    "connect",
+    "postgres",
+    "postgresql",
+    "express",
+    "json"
+  ],
+  "version": "1.2",
+  "homepage": "https://github.com/geniyz/connect-pg-json",
+  "repository": {
+    "type": "git",
+    "url": "ssh://git@github.com/geniyz/connect-pg-json.git"
+  },
+  "main": "index",
+  "engines": {
+    "node": ">= 0.4.5"
+  },
+  "dependencies": {
+    "connect": ">= 1.5.0",
+    "pg": ">= 0.5.0"
+  },
+  "readme": "First install web.sql into postgres; then insert into app.js: app.use(session({store: new (require('connect-pg'))(db.pgConnect), secret: 'tap-tap-tap'}))",
+  "bugs": {
+    "url": "https://github.com/geniyz/connect-pg-json/issues"
+  },
+  "_id": "connect-pg-json@1.2.0",
+  "_from": "connect-pg-json@"
+}
