@@ -25,13 +25,13 @@ SET search_path = web, pg_catalog;
 --
 
 CREATE FUNCTION clear_sessions() RETURNS void
-    LANGUAGE plpgsql SECURITY DEFINER
-    SET search_path TO web, pg_temp
-    AS $$
-			begin 
-				delete from web.session;
-			end;
-		$$;
+  LANGUAGE plpgsql SECURITY DEFINER
+  SET search_path TO web, pg_temp
+  AS $$
+  begin
+    delete from web.session;
+  end;
+$$;
 
 
 ALTER FUNCTION web.clear_sessions() OWNER TO postgres;
@@ -41,17 +41,11 @@ ALTER FUNCTION web.clear_sessions() OWNER TO postgres;
 --
 
 CREATE FUNCTION count_sessions() RETURNS integer
-    LANGUAGE plpgsql SECURITY DEFINER
-    SET search_path TO web, pg_temp
-    AS $$
-			declare
-				thecount int := 0;
-			begin
-				select count(*) into thecount
-					from web.valid_sessions();
-				return thecount;
-			end;
-		$$;
+  LANGUAGE sql SECURITY DEFINER
+  SET search_path TO web, pg_temp
+  AS $$
+    select count(*) from web.valid_sessions();
+$$;
 
 
 ALTER FUNCTION web.count_sessions() OWNER TO postgres;
@@ -61,13 +55,11 @@ ALTER FUNCTION web.count_sessions() OWNER TO postgres;
 --
 
 CREATE FUNCTION destroy_session(sessid text) RETURNS void
-    LANGUAGE plpgsql SECURITY DEFINER
-    SET search_path TO web, pg_temp
-    AS $$
-			begin
-				delete from web.session where sess_id = sessid;
-			end;
-		$$;
+  LANGUAGE sql SECURITY DEFINER
+  SET search_path TO web, pg_temp
+  AS $$
+    delete from web.session where sess_id = sessid;
+$$;
 
 
 ALTER FUNCTION web.destroy_session(sessid text) OWNER TO postgres;
@@ -77,15 +69,11 @@ ALTER FUNCTION web.destroy_session(sessid text) OWNER TO postgres;
 --
 
 CREATE FUNCTION get_session_data(sessid text) RETURNS SETOF json
-    LANGUAGE plpgsql SECURITY DEFINER
-    SET search_path TO web, pg_temp
-    AS $$
-			begin
-				return query select sess_data 
-					from web.valid_sessions()
-					where sess_id = sessid;
-			end;
-		$$;
+  LANGUAGE sql SECURITY DEFINER
+  SET search_path TO web, pg_temp
+  AS $$
+    select sess_data from web.valid_sessions() where sess_id = sessid;
+$$;
 
 
 ALTER FUNCTION web.get_session_data(sessid text) OWNER TO postgres;
@@ -95,14 +83,11 @@ ALTER FUNCTION web.get_session_data(sessid text) OWNER TO postgres;
 --
 
 CREATE FUNCTION remove_expired() RETURNS trigger
-    LANGUAGE plpgsql SECURITY DEFINER
-    SET search_path TO web, pg_temp
-    AS $$
-			begin
-				delete from web.session where expiration < now();
-				return null;
-			end;
-		$$;
+  LANGUAGE sql SECURITY DEFINER
+  SET search_path TO web, pg_temp
+  AS $$
+    delete from web.session where expiration < now();
+$$;
 
 
 ALTER FUNCTION web.remove_expired() OWNER TO postgres;
@@ -112,29 +97,29 @@ ALTER FUNCTION web.remove_expired() OWNER TO postgres;
 --
 
 CREATE FUNCTION set_session_data(sessid text, sessdata json, expire timestamp with time zone) RETURNS void
-    LANGUAGE plpgsql SECURITY DEFINER
-    SET search_path TO web, pg_temp
-    AS $$
-			begin
-				loop
-					update web.session 
-						set sess_data = sessdata, 
-							expiration = expire 
-						where sess_id = sessid;
-					if found then
-						return;
-					end if;
-					begin
-						insert into web.session (sess_id, sess_data, expiration) 
-							values (sessid, sessdata, expire);
-						return;
-					exception
-						when unique_violation then
-							-- do nothing.
-					end;
-				end loop;
-			end;
-		$$;
+  LANGUAGE plpgsql SECURITY DEFINER
+  SET search_path TO web, pg_temp
+  AS $$
+  begin
+    loop
+      update web.session 
+         set sess_data = sessdata
+            ,expiration = expire
+       where sess_id = sessid;
+      if found then
+        return;
+      end if;
+      begin
+        insert into web.session (sess_id, sess_data, expiration) 
+                         values (sessid, sessdata, expire);
+        return;
+      exception
+        when unique_violation then
+          -- do nothing.
+      end;
+    end loop;
+  end;
+$$;
 
 
 ALTER FUNCTION web.set_session_data(sessid text, sessdata json, expire timestamp with time zone) OWNER TO postgres;
@@ -148,9 +133,9 @@ SET default_with_oids = false;
 --
 
 CREATE TABLE session (
-    sess_id text NOT NULL,
-    sess_data json,
-    expiration timestamp with time zone DEFAULT (now() + '1 day'::interval)
+   sess_id    text NOT NULL
+  ,sess_data  json
+  ,expiration timestamp with time zone DEFAULT (now() + '1 day'::interval)
 );
 
 
@@ -161,15 +146,15 @@ ALTER TABLE web.session OWNER TO postgres;
 --
 
 CREATE FUNCTION valid_sessions() RETURNS SETOF session
-    LANGUAGE plpgsql SECURITY DEFINER
-    SET search_path TO web, pg_temp
-    AS $$
-			begin
-				return query select * from web.session
-					where expiration > now() 
-						or expiration is null;
-			end;
-		$$;
+  LANGUAGE sql SECURITY DEFINER
+  SET search_path TO web, pg_temp
+  AS $$
+  select *
+    from web.session
+   where expiration > now()
+      or expiration is null
+  ;
+$$;
 
 
 ALTER FUNCTION web.valid_sessions() OWNER TO postgres;
@@ -178,8 +163,7 @@ ALTER FUNCTION web.valid_sessions() OWNER TO postgres;
 -- Name: session_pkey; Type: CONSTRAINT; Schema: web; Owner: postgres; Tablespace: 
 --
 
-ALTER TABLE ONLY session
-    ADD CONSTRAINT session_pkey PRIMARY KEY (sess_id);
+ALTER TABLE ONLY session ADD CONSTRAINT session_pkey PRIMARY KEY (sess_id);
 
 
 --
